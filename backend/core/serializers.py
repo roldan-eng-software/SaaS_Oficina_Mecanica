@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Servico
+from .models import Servico, Agendamento
 from django.contrib.auth.models import User
 
 
@@ -27,3 +27,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             last_name=validated_data.get('last_name', ''),
         )
         return user
+
+class AgendamentoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Agendamento
+        fields = ('id', 'cliente', 'veiculo', 'servico', 'data_agendada', 'status', 'observacoes')

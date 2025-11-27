@@ -1,10 +1,11 @@
 from rest_framework.routers import DefaultRouter
 from django.urls import path, include
-from .views import ServicoViewSet
+from .views import ServicoViewSet, AgendamentoViewSet
 from .views import RegisterView, LogoutView, CookieTokenObtainPairView, CookieTokenRefreshView
 
 router = DefaultRouter()
 router.register(r'servicos', ServicoViewSet, basename='servico')
+router.register(r'agendamentos', AgendamentoViewSet, basename='agendamento')
 
 urlpatterns = [
     path('', include(router.urls)),

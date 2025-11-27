@@ -1,6 +1,6 @@
 from rest_framework import viewsets, permissions
-from .models import Servico
-from .serializers import ServicoSerializer, RegisterSerializer
+from .models import Servico, Agendamento
+from .serializers import ServicoSerializer, RegisterSerializer, AgendamentoSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -32,6 +32,12 @@ class RegisterView(APIView):
             user = serializer.save()
             return Response({'id': user.id, 'username': user.username}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class AgendamentoViewSet(viewsets.ModelViewSet):
+    queryset = Agendamento.objects.all().order_by('-id')
+    serializer_class = AgendamentoSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
 
 
 class LogoutView(APIView):
