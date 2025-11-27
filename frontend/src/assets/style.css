@@ -1,0 +1,4 @@
+/* Arquivo de estilo base mínimo */
+body { background: #f7fafc; color: #111827; }
+input { padding: 0.5rem; margin: 0.25rem 0; width: 100%; box-sizing: border-box; }
+button { padding: 0.5rem 1rem; margin-top: 0.5rem; }
