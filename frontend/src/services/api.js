@@ -8,6 +8,7 @@ const api = axios.create({
 
 // Attach Authorization header when access token exists
 api.interceptors.request.use(config => {
+  if (config.skipAuth) return config
   const token = localStorage.getItem('access')
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config
@@ -31,6 +32,7 @@ const processQueue = (error, token = null) => {
 api.interceptors.response.use(
   response => response,
   error => {
+    console.log("Erro no interceptor de resposta da API:", error.response); // Adicionar este log
     const originalRequest = error.config
     if (!originalRequest) return Promise.reject(error)
 

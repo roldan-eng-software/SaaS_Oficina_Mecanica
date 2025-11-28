@@ -23,7 +23,8 @@ export async function logout() {
   try {
     if (refresh) {
       // use bare axios to avoid interceptors
-      await axios.post(baseRefreshUrl.replace('/token/refresh/', '/auth/logout/'), { refresh })
+      // Correção: construir a URL de logout corretamente
+      await axios.post(api.defaults.baseURL + '/auth/logout/', { refresh })
     }
   } catch (e) {
     // ignore

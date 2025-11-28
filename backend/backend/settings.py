@@ -100,3 +100,17 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
 }
+
+# Email Configuration
+# For development: emails will be printed to console
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# For production, use SMTP (uncomment and configure):
+#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+#EMAIL_HOST = 'smtp.gmail.com'
+#EMAIL_PORT = 587
+#EMAIL_USE_TLS = True
+#EMAIL_HOST_USER = 'sandro.roldan@gmail.com'
+#EMAIL_HOST_PASSWORD = 'lazk wymt chee xvdi'
+
+#DEFAULT_FROM_EMAIL = 'AutoExpert <roldan.eng.software@gmail.com>'

@@ -186,46 +186,9 @@
                 <h2 class="text-text-light dark:text-text-dark tracking-light text-[32px] font-bold leading-tight sm:text-4xl sm:font-black">Agende Seu Horário</h2>
                 <p class="text-text-muted-light dark:text-text-muted-dark text-base font-normal leading-normal">Preencha o formulário abaixo para agendar seu serviço. Entraremos em contato para confirmar.</p>
               </div>
-                <div class="w-full max-w-3xl bg-white dark:bg-gray-900 p-8 rounded-xl border border-gray-200 dark:border-gray-800">
-                <form @submit.prevent="submit" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div>
-                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-2" for="name">Nome Completo</label>
-                    <input v-model="form.name" required class="form-input flex w-full resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary dark:focus:border-primary h-12 placeholder:text-gray-400 dark:placeholder:text-gray-500 px-4 text-base font-normal" id="name" placeholder="Digite seu nome completo" type="text" />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-2" for="email">Email</label>
-                    <input v-model="form.email" required class="form-input flex w-full resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary dark:focus:border-primary h-12 placeholder:text-gray-400 dark:placeholder:text-gray-500 px-4 text-base font-normal" id="email" placeholder="seuemail@exemplo.com" type="email" />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-2" for="phone">Telefone</label>
-                    <input v-model="form.phone" required class="form-input flex w-full resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary dark:focus:border-primary h-12 placeholder:text-gray-400 dark:placeholder:text-gray-500 px-4 text-base font-normal" id="phone" placeholder="(00) 90000-0000" type="tel" />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-2" for="vehicle">Veículo (Marca/Modelo)</label>
-                    <input v-model="form.vehicle" class="form-input flex w-full resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary dark:focus:border-primary h-12 placeholder:text-gray-400 dark:placeholder:text-gray-500 px-4 text-base font-normal" id="vehicle" placeholder="Ex: Toyota Corolla" type="text" />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-2" for="service">Serviço Desejado</label>
-                    <select v-model="form.service" class="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-background-light dark:bg-gray-800 text-text-light dark:text-text-dark focus:border-primary focus:ring-primary" id="service">
-                      <option>Manutenção Geral</option>
-                      <option>Diagnóstico de Motor</option>
-                      <option>Freios e Suspensão</option>
-                      <option>Serviços de Pneus</option>
-                      <option>Outro</option>
-                    </select>
-                  </div>
-                  <div class="sm:col-span-2">
-                    <label class="block text-sm font-medium text-text-light dark:text-text-dark mb-2" for="date">Data e Hora Preferenciais</label>
-                    <input v-model="form.date" required class="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-background-light dark:bg-gray-800 text-text-light dark:text-text-dark focus:border-primary focus:ring-primary" id="date" type="datetime-local" />
-                  </div>
-                  <div class="sm:col-span-2">
-                    <button :disabled="submitting" class="w-full flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-opacity" type="submit">
-                      <span class="truncate">Enviar Agendamento</span>
-                    </button>
-                  </div>
-                </form>
-                <div v-if="message" class="mt-4 p-3 rounded-md" :class="{'bg-green-50 text-green-800': messageType==='success','bg-red-50 text-red-800': messageType==='error'}">{{ message }}</div>
-              </div>
+                <div class="w-full max-w-3xl">
+                    <agendamento-form />
+                </div>
             </div>
           </div>
         </section>
@@ -269,61 +232,12 @@
 </template>
 
 <script>
-import api from '@/services/api'
+import AgendamentoForm from '@/components/AgendamentoForm.vue'
 
 export default {
   name: 'Landing',
-  data() {
-    return {
-      form: {
-        name: '',
-        email: '',
-        phone: '',
-        vehicle: '',
-        service: 'Manutenção Geral',
-        date: ''
-      },
-      submitting: false,
-      message: null,
-      messageType: 'success'
-    }
-  },
-  methods: {
-    async submit() {
-      this.message = null
-      // validação mínima
-      if (!this.form.name || !this.form.email || !this.form.date) {
-        this.messageType = 'error'
-        this.message = 'Preencha pelo menos Nome, E-mail e Data/horário.'
-        return
-      }
-      this.submitting = true
-      try {
-        const payload = {
-          cliente: this.form.name,
-          veiculo: this.form.vehicle || '-',
-          descricao: `Serviço: ${this.form.service}`,
-          telefone: this.form.phone,
-          email: this.form.email,
-          data_agendada: this.form.date
-        }
-        await api.post('/servicos/', payload)
-        this.messageType = 'success'
-        this.message = 'Agendamento enviado com sucesso. Entraremos em contato para confirmar.'
-        // limpar formulário parcialmente
-        this.form.name = ''
-        this.form.email = ''
-        this.form.phone = ''
-        this.form.vehicle = ''
-        this.form.date = ''
-      } catch (err) {
-        console.error(err)
-        this.messageType = 'error'
-        this.message = 'Erro ao enviar agendamento. Tente novamente.'
-      } finally {
-        this.submitting = false
-      }
-    }
+  components: {
+    AgendamentoForm
   }
 }
 </script>

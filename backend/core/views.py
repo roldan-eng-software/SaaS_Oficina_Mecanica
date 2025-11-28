@@ -1,6 +1,6 @@
 from rest_framework import viewsets, permissions
-from .models import Servico, Agendamento
-from .serializers import ServicoSerializer, RegisterSerializer, AgendamentoSerializer
+from .models import Servico, Agendamento, TipoServico
+from .serializers import ServicoSerializer, RegisterSerializer, AgendamentoSerializer, UserSerializer, TipoServicoSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,6 +10,39 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.conf import settings
 
+
+class IsAdminUserOrReadOnly(permissions.BasePermission):
+    """
+    Permite acesso de leitura para qualquer usuário,
+    mas acesso de escrita apenas para usuários administradores.
+    """
+    def has_permission(self, request, view):
+        # Permite solicitações GET, HEAD ou OPTIONS.
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        # Permite solicitações de escrita apenas para administradores.
+        return request.user and request.user.is_staff
+
+
+class UserDetailView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
+
+    def patch(self, request):
+        user = request.user
+        serializer = UserSerializer(user, data=request.data, partial=True) # partial=True para atualizações parciais
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class TipoServicoViewSet(viewsets.ModelViewSet):
+    queryset = TipoServico.objects.all().order_by('nome')
+    serializer_class = TipoServicoSerializer
+    permission_classes = [IsAdminUserOrReadOnly] # Usar a nova permissão
 
 class ServicoViewSet(viewsets.ModelViewSet):
     queryset = Servico.objects.all().order_by('-id')
@@ -21,6 +54,43 @@ class ServicoViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             return [permissions.AllowAny()]
         return [perm() for perm in self.permission_classes]
+    
+    def get_queryset(self):
+        """
+        Filter appointments based on user role:
+        - Admins (staff) see all appointments
+        - Regular users see only their own appointments
+        """
+        queryset = super().get_queryset()
+        user = self.request.user
+        
+        # If user is not authenticated, return empty queryset
+        if not user.is_authenticated:
+            return queryset.none()
+        
+        # If user is staff/admin, return all appointments
+        if user.is_staff:
+            return queryset
+        
+        # Regular users see only their own appointments
+        return queryset.filter(user=user)
+    
+    def perform_create(self, serializer):
+        """
+        Automatically associate the logged-in user with the appointment.
+        If user is not authenticated (landing page), leave user as null.
+        """
+        if self.request.user.is_authenticated:
+            serializer.save(user=self.request.user)
+        else:
+            serializer.save()
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all().order_by('username')
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAdminUser] # Apenas administradores
+    http_method_names = ['get', 'patch', 'delete'] # Permite GET, PATCH, DELETE
 
 
 class RegisterView(APIView):
